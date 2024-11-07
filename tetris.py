@@ -66,6 +66,10 @@ ALL_TETROS = [
     THE_T, THE_STICK, THE_L_LEFT, THE_L_RIGHT, THE_SQUARE, THE_DOG_LEFT, THE_DOG_RIGHT
 ]
 
+SCORE_SINGLE = 100
+SCORE_DOUBLE = 300
+SCORE_TRIPLE = 500
+SCORE_TETRIS = 800
 
 
 class Tetromino:
@@ -124,6 +128,7 @@ def apply_script(protocol, connection, config):
         screen_pixels = []
         world_pixels = []
         board = []
+        score = 0
 
         current_piece: Tetromino | None = None
 
@@ -210,6 +215,19 @@ def apply_script(protocol, connection, config):
         def lock_current_piece(self) -> None:
             for offset in self.current_piece.get_offsets():
                 self.board[self.current_piece.pos_x + offset[0]][self.current_piece.pos_y + offset[1]] = self.current_piece.color
+
+                if offset[1] + self.current_piece.pos_y >= (self.BOARD_H - 1):
+                    self.end_game()
+        
+        def end_game(self) -> None:
+            self.free_board()
+            self.send_chat(f"Game finished. Score: {self.score} !")
+            self.score = 0
+        
+        def free_board(self) -> None:
+            for x in range(self.BOARD_W):
+                for y in range(self.BOARD_H):
+                    self.board[x][y] = (0, 0, 0)
         
         def pixel_in_current_piece(self, pixel_x: int, pixel_y: int) -> bool:
             for offset in self.current_piece.get_offsets():
@@ -236,6 +254,7 @@ def apply_script(protocol, connection, config):
                         self.board[x][y] = (0, 0, 0)
         
         def update_board(self) -> None:
+            tot_removed_rows = 0
             for y in range(self.BOARD_H - 1, -1, -1):
                 tot_empty = 0
                 for x in range(0, self.BOARD_W):
@@ -244,6 +263,12 @@ def apply_script(protocol, connection, config):
 
                 if tot_empty == 0:
                     self.remove_row(y)
+                    tot_removed_rows += 1
+            
+            if tot_removed_rows == 1: self.score += SCORE_SINGLE
+            if tot_removed_rows == 2: self.score += SCORE_DOUBLE
+            if tot_removed_rows == 3: self.score += SCORE_TRIPLE
+            if tot_removed_rows == 4: self.score += SCORE_TETRIS
 
         def refresh_screen(self) -> None:
             self.game_tick()
