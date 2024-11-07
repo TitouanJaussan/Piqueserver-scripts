@@ -130,7 +130,7 @@ def apply_script(protocol, connection, config):
         board = []
         score = 0
 
-        current_piece: Tetromino | None = None
+        current_piece = None
 
         def on_spawn(self, pos) -> None:
             self.send_chat("Generated screen pixels")
