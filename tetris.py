@@ -115,6 +115,11 @@ def up(connection, *args):
 def down(connection, *args):
     connection.move_down()
 
+@command("tetris")
+def tetris(connection, *args):
+    x, y, z = connection.get_location()
+    connection.create_tetris(x + 1, y, z)
+
 def apply_script(protocol, connection, config):
     class TetrisConnection(connection):
         start_position = None
@@ -149,7 +154,7 @@ def apply_script(protocol, connection, config):
                 if not self.is_dir_safe(0, 0):
                     self.current_piece.rotate(-1)
 
-        def on_block_build(self, x: int, y: int, z: int) -> None:
+        def create_tetris(self, x: int, y: int, z: int) -> None:
             if self.block_placed:
                 return None
 
@@ -167,8 +172,6 @@ def apply_script(protocol, connection, config):
             FPS = 20
             self.loop.start(1 / FPS)
 
-            return connection.on_block_build(self, x, y, z)
-        
         def is_out_of_board(self, x: int, y: int) -> bool:
             return (x < 0 or y < 0 or x > self.BOARD_W - 1 or y > self.BOARD_H - 1)
 
