@@ -3,17 +3,19 @@ from pyspades.contained import BlockAction, SetColor
 from pyspades.common import make_color
 from twisted.internet.task import LoopingCall
 from pyspades.constants import BUILD_BLOCK, DESTROY_BLOCK
-import os
+from math import sqrt
 from PIL import Image
+import os
 
 # Gif player by Gato
 # To play a gif make a gifs directory in the parent directory of scripts
 # Drop a .gif inside of the gifs directory and then do /gif <gif_name.gif> <gif tag> <playback speed> <scale reduction (2 means twice as small as original gif)> <axis ("x" or "y" or "z")>
 
 
-GIF_SIZE_REDUCTION = 10
+GIF_SIZE_REDUCTION = 20
 DEFAULT_PLAYBACK_SPEED = 0.1  # Render the next frame every 0.1 secs. Can be changed to any value
 DEFAULT_AXIS = "x"
+DEACTIVATION_RADIUS = 15  # Gifs won't update if there is no player closer than 15 blocks
 
 @command("gif")
 def gif(connection, file_name: str = "pedro.gif", gif_tag: str = "gif0", playback_speed: str = str(DEFAULT_PLAYBACK_SPEED), scale: str = str(GIF_SIZE_REDUCTION), axis: str = DEFAULT_AXIS) -> None:
@@ -44,6 +46,8 @@ class Gif:
         self.x, self.y, self.z = self.connection.get_location()
         self.load_gif_data()
 
+        self.center_x, self.center_y, self.center_z = self.get_center()
+
         self.screen_buffer = [[(255, 0, 0) for y in range(self.height)] for x in range(self.width)]
 
         self.loop = LoopingCall(self.update)
@@ -53,7 +57,7 @@ class Gif:
         base_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(base_path)
         os.chdir("..")
-        
+
         gif = Image.open(self.file_path)
         current_frame_idx = 0
 
@@ -88,8 +92,28 @@ class Gif:
         
         gif.close()
     
+    def get_dist(self, x, y, z) -> float:
+        return sqrt(
+            (x - self.center_x)**2 +
+            (y - self.center_y)**2 +
+            (z - self.center_z)**2
+        )
+    
+    def check_for_nearby_players(self) -> None:
+        self.paused = True
+        for player in self.connection.protocol.players.values():
+            if not player.world_object: return None
+
+            dist = self.get_dist(*player.world_object.position.get())
+
+            if dist < DEACTIVATION_RADIUS:
+                self.paused = False
+                return None
+
     def update(self) -> None:
         self.ticks += 1
+        self.check_for_nearby_players()
+
         if not self.paused:
             self.render_frame()
     
@@ -121,6 +145,30 @@ class Gif:
                 screen_x + self.y,
                 self.z
             )
+    
+    def get_center(self) -> tuple[float, float, float]:
+        center_pos = ()
+
+        if self.axis == "x":
+            center_pos = (
+                self.x + self.width / 2,
+                self.y,
+                self.z + self.height / 2
+            )
+        elif self.axis == "y":
+            center_pos = (
+                self.x,
+                self.y + self.width / 2,
+                self.z + self.height / 2
+            )
+        elif self.axis == "z":
+            center_pos = (
+                self.x + self.width / 2,
+                self.y + self.height / 2,
+                self.z
+            )
+        
+        return center_pos
     
     def change_pixel(self, screen_x: int, screen_y: int, pixel_color: tuple[int, int, int]) -> None:
         pixel_x, pixel_y, pixel_z = self.screen_to_world(screen_x, screen_y)
@@ -157,6 +205,10 @@ def apply_script(protocol, connection, config):
         def load_gif(self, file_name: str, gif_tag: str, playback_speed: float, scale: int, axis: str) -> None:
             if self.all_gifs.get(gif_tag) != None:
                 self.send_chat("This gif already exists. Delete it with /dgif to create a new one with the same gif tag")
+                return None
+
+            if not axis in ("x", "y", "z"):
+                self.send_chat("Invalid axis for gif. Must be 'x', 'y' or 'z'")
                 return None
 
             self.all_gifs[gif_tag] = Gif(file_name, self, playback_speed, scale, axis)
