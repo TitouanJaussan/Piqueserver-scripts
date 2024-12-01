@@ -41,7 +41,6 @@ def apply_script(protocol, connection, config):
 
             if role == None:
                 self.send_chat(f"You don't have a role yet !\nGet one with /role <your role>.\nExample: /role 'the Master of Bamboo' -> {name} the Master of bamboo connected !")
-                self.protocol.broadcast_chat(f"{name}, roleless connected !")
             else:
                 self.protocol.broadcast_chat(f"{name}, {role} connected !")
 
