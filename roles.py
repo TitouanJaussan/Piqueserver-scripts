@@ -27,11 +27,9 @@ def load_role(user_name: str) -> str:
     data = get_json()
     return data.get(user_name)
 
-def save_role(connection, user_name: str, role: str) -> None:
+def save_role(user_name: str, role: str) -> None:
     data = get_json()
     data[user_name] = role
-
-    connection.send_chat("Role succesfully updated !")
 
     with open("roles.json", "w") as file:
         json.dump(data, file, indent=4)
@@ -42,7 +40,8 @@ def apply_script(protocol, connection, config):
             role: str = load_role(name)
 
             if role == None:
-                self.send_chat(f"You don't have a role yet !")
+                self.send_chat(f"You don't have a role yet !\nGet one with /role <your role>.\nExample: /role 'the Master of Bamboo' -> {name} the Master of bamboo connected !")
+                self.protocol.broadcast_chat(f"{name}, roleless connected !")
             else:
                 self.protocol.broadcast_chat(f"{name}, {role} connected !")
 
