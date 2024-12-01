@@ -27,9 +27,11 @@ def load_role(user_name: str) -> str:
     data = get_json()
     return data.get(user_name)
 
-def save_role(user_name: str, role: str) -> None:
+def save_role(connection, user_name: str, role: str) -> None:
     data = get_json()
     data[user_name] = role
+
+    connection.send_chat("Role succesfully updated !")
 
     with open("roles.json", "w") as file:
         json.dump(data, file, indent=4)
