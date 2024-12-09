@@ -16,6 +16,14 @@ DEFAULT_MODE = "public"
 COUNTDOWN_STEPS = [600, 300, 150, 60, 30, 20, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 DEFAULT_END_MESSAGE = "Time Over !"
 
+@command("check_countdown")
+def check_countdown(connection, *args):
+    if not connection.currently_active:
+        connection.send_chat(f"There is no countdown for now")
+        return
+
+    connection.send_chat(f"There is {connection.secs_to_text(connection.current_time)} left on the clock !")
+
 @command("countdown")
 def countdown(connection, *args):
     if len(args) == 0:
