@@ -12,7 +12,7 @@ Example: /countdown 60 private
          /countdown stop
 """
 
-DEFAULT_MODE = "public"
+DEFAULT_MODE = "private"
 COUNTDOWN_STEPS = [600, 300, 150, 60, 30, 20, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 DEFAULT_END_MESSAGE = "Time Over !"
 
@@ -73,6 +73,11 @@ def countdown(connection, *args):
         public = DEFAULT_MODE.lower() == "public"
     else:
         public = args[1].lower() == "public"
+    
+    if public:
+        if not connection.admin:
+            connection.send_chat("You can't create a public countdown, you need to be admin !")
+            return
 
     connection.public = public
     connection.current_time = tot_time
