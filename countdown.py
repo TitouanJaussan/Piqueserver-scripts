@@ -10,6 +10,7 @@ Example: /countdown 60 private
          /countdown 1:20 <-> /countdown 80
          /countdown 1:40:00
          /countdown stop
+         /check_countdown
 """
 
 DEFAULT_MODE = "private"
