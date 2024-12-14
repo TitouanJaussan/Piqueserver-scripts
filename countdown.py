@@ -25,7 +25,7 @@ def check_countdown(connection, *args):
 
     connection.send_chat(f"There is {connection.secs_to_text(connection.current_time)} left")
 
-@command("countdown")
+@command("countdown", "cd")
 def countdown(connection, *args):
     if len(args) == 0:
         connection.send_chat("/countdown <time in secs>. Will start a countdown for how long you want it to.\nExample: /countdown 10 or /countdown 1:30. Time is in secs")
