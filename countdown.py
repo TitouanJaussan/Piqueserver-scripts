@@ -127,7 +127,7 @@ def apply_script(protocol, connection, config):
             self.currently_active = False
 
         def start_countdown(self) -> None:
-            self.send_msg(f"Started a {"public" if self.public else "private"} countdown of {self.secs_to_text(self.current_time)}")
+            self.send_msg(f"Started a {'public' if self.public else 'private'} countdown of {self.secs_to_text(self.current_time)}")
             self.call = LoopingCall(self.tick)
 
             self.call.start(1.0)
