@@ -99,9 +99,9 @@ def apply_script(protocol, connection, config):
             text = ""
 
             # Sorry abt the mess down here but it works, so ¯\_(o_o)_/¯
-            if hours > 0: text += f"{hours} hour{"s" if hours > 1 else ""} "
-            if minutes > 0: text += f"{minutes} min{"s" if minutes > 1 else ""} "
-            if secs > 0: text += f"{secs} sec{"s" if secs > 1 else ""} "
+            if hours > 0: text += f"{hours} hour{'s' if hours > 1 else ''} "
+            if minutes > 0: text += f"{minutes} min{'s' if minutes > 1 else ''} "
+            if secs > 0: text += f"{secs} sec{'s' if secs > 1 else ''} "
 
             return text
 
