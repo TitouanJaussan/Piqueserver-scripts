@@ -22,7 +22,7 @@ def check_countdown(connection, *args):
         connection.send_chat(f"There is no countdown for now")
         return
 
-    connection.send_chat(f"There is {connection.secs_to_text(connection.current_time)} left on the clock !")
+    connection.send_chat(f"There is {connection.secs_to_text(connection.current_time)} left")
 
 @command("countdown")
 def countdown(connection, *args):
@@ -112,7 +112,7 @@ def apply_script(protocol, connection, config):
                 self.on_countdow_end()
             
             elif self.current_time in COUNTDOWN_STEPS:
-                self.send_msg(f"{self.secs_to_text(self.current_time)} left on the clock !")
+                self.send_msg(f"{self.secs_to_text(self.current_time)} left")
         
         def send_msg(self, msg: str):
             if self.public:
